@@ -2,9 +2,9 @@ name: Scheduled YouTube Shorts Auto Upload
 
 on:
   schedule:
-    # Runs 6 times a day: every 2 hours between 08:00 and 18:00 UTC (08:00, 10:00, 12:00, 14:00, 16:00, 18:00)
+    # Runs 6 times a day: every 4 hours around the clock (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
     # YouTube free Data API limit = 10,000 units/day; 1 upload = 1,600 units -> max 6 uploads/day
-    - cron: '0 8,10,12,14,16,18 * * *'
+    - cron: '0 0,4,8,12,16,20 * * *'
   workflow_dispatch:
 
 permissions:

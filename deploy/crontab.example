@@ -1,0 +1,1 @@
+@reboot cd /home/meet/projects/ai-video-gen && /home/meet/projects/ai-video-gen/scripts/start_bot_background.sh

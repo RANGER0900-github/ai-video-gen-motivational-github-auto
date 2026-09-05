@@ -1,0 +1,12 @@
+{
+  "name": "ai-video-gen-youtube-tools",
+  "private": true,
+  "version": "0.1.0",
+  "description": "YouTube upload helper for AI motivational videos",
+  "scripts": {
+    "upload:youtube": "node upload.js"
+  },
+  "dependencies": {
+    "googleapis": "^171.0.0"
+  }
+}

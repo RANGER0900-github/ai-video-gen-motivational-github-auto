@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-video-gen"
+version = "0.1.0"
+description = "Linux-friendly motivational video generator with Telegram bot control"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pandas>=2.2.0,<3.0.0",
+  "pillow>=11.0.0,<12.0.0",
+  "colorama>=0.4.6,<1.0.0",
+  "python-telegram-bot>=21.0,<22.0",
+  "pydantic>=2.7.0,<3.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0,<9.0.0",
+  "httpx>=0.28.0,<1.0.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "backend"}
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

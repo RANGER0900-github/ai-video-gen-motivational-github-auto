@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.codex
+state/
+node_modules/
+.playwright-cli/
+backend/*.egg-info/
+backend/**/*.egg-info/
+outputs/
+*.log
+*TEMP_MPY*
+.env
+.youtube.env
+client_secret*.json
+credentials*.json

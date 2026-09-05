@@ -1,0 +1,16 @@
+[Unit]
+Description=AI Motivational Video Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/meet/projects/ai-video-gen
+EnvironmentFile=-/home/meet/projects/ai-video-gen/state/bot.env
+ExecStart=/home/meet/projects/ai-video-gen/scripts/run_bot.sh
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

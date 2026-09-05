@@ -27,8 +27,22 @@ def main() -> None:
     job_service.start()
     try:
         quotes = [quote.row_id for quote in quote_store.list_quotes() if quote.status.lower() != "used"][: args.count]
+        unused = [quote.row_id for quote in quote_store.list_quotes() if quote.status.lower() != "used"]
+        if len(unused) >= args.count:
+            quotes = unused[: args.count]
+        elif unused:
+            all_quotes = [quote.row_id for quote in quote_store.list_quotes()]
+            quotes = unused + [q for q in all_quotes if q not in unused][: args.count - len(unused)]
+        else:
+            import random
+            all_quotes = [quote.row_id for quote in quote_store.list_quotes()]
+            if not all_quotes:
+                raise ValueError("No quotes found in quotes.csv")
+            quotes = random.sample(all_quotes, min(args.count, len(all_quotes)))
+
         jobs = job_service.create_jobs(CreateJobRequest(row_ids=quotes, darken=args.darken, image_name=args.image_name, music_name=args.music_name))
         pending = {job.id for job in jobs}
+        failed = set()
         while pending:
             done = set()
             for job_id in pending:
@@ -36,9 +50,14 @@ def main() -> None:
                 print(f"[{job.id}] {job.status:10s} {job.progress:>5.0%} {job.message}")
                 if job.status in {"completed", "failed", "cancelled"}:
                     done.add(job_id)
+                    if job.status != "completed":
+                        failed.add(job_id)
             pending -= done
             if pending:
                 time.sleep(2)
+        if failed:
+            print(f"❌ Error: Job(s) failed: {failed}")
+            raise SystemExit(1)
     finally:
         job_service.stop()
 

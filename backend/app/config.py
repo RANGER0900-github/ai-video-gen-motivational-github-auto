@@ -66,6 +66,7 @@ def load_config(root_dir: Path | None = None) -> AppConfig:
         if part.strip()
     )
     default_chat_id_raw = os.getenv("AI_VIDEO_GEN_DEFAULT_CHAT_ID", "").strip()
+
     return AppConfig(
         root_dir=root,
         state_dir=state_dir,
@@ -97,6 +98,7 @@ def load_config(root_dir: Path | None = None) -> AppConfig:
         youtube_retry_limit=int(os.getenv("AI_VIDEO_GEN_YOUTUBE_RETRY_LIMIT", "5")),
         instagram_retry_limit=int(os.getenv("AI_VIDEO_GEN_INSTAGRAM_RETRY_LIMIT", "3")),
     )
+
 
 
 def check_runtime(config: AppConfig) -> list[str]:

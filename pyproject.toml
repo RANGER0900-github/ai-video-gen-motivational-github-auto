@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ai-video-gen"
 version = "0.1.0"
 description = "Linux-friendly motivational video generator with Telegram bot control"
+description = "Automated motivational video generator with scheduled YouTube Shorts uploads"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

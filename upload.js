@@ -134,10 +134,33 @@ async function main() {
   const sourceJob = jobRowForFile(resolvedVideo) || latest;
 
   const title = (args.title || process.env.YOUTUBE_TITLE || DEFAULT_TITLE).trim();
+  let title = (args.title || process.env.YOUTUBE_TITLE || '').trim();
+  if (!title) {
+    if (sourceJob && sourceJob.quote) {
+      const cleanQuote = sourceJob.quote.replace(/^["'\s]+|["'\s]+$/g, '');
+      const suffix = ' #Shorts #motivation';
+      const maxLen = 100 - suffix.length;
+      const clipped = cleanQuote.length > maxLen ? cleanQuote.slice(0, maxLen).trim() : cleanQuote;
+      title = `${clipped}${suffix}`;
+    } else {
+      title = DEFAULT_TITLE;
+    }
+  }
   if (title.length > 100) {
     throw new Error(`Title exceeds 100 characters (${title.length}): ${title}`);
+    title = title.slice(0, 100);
   }
   const description = (args.description || process.env.YOUTUBE_DESCRIPTION || DEFAULT_DESCRIPTION).trim();
+
+  let description = (args.description || process.env.YOUTUBE_DESCRIPTION || '').trim();
+  if (!description) {
+    if (sourceJob && sourceJob.quote) {
+      const authorLine = sourceJob.author ? `\n— ${sourceJob.author.trim()}\n` : '\n';
+      description = `"${sourceJob.quote.trim()}"${authorLine}\nSave this short, share it, and come back when you need a reset.\n\n` + DEFAULT_DESCRIPTION;
+    } else {
+      description = DEFAULT_DESCRIPTION;
+    }
+  }
   const privacy = (args.privacy || process.env.YOUTUBE_PRIVACY_STATUS || DEFAULT_PRIVACY).trim();
   const categoryId = (args.category || process.env.YOUTUBE_CATEGORY_ID || DEFAULT_CATEGORY_ID).trim();
   const tags = (args.tags || process.env.YOUTUBE_TAGS || DEFAULT_TAGS.join(','))

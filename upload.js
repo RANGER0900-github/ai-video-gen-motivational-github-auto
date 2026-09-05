@@ -133,6 +133,7 @@ async function main() {
   }
   const sourceJob = jobRowForFile(resolvedVideo) || latest;
 
+  const title = (args.title || process.env.YOUTUBE_TITLE || DEFAULT_TITLE).trim();
   let title = (args.title || process.env.YOUTUBE_TITLE || '').trim();
   if (!title) {
     if (sourceJob && sourceJob.quote) {
@@ -146,8 +147,10 @@ async function main() {
     }
   }
   if (title.length > 100) {
+    throw new Error(`Title exceeds 100 characters (${title.length}): ${title}`);
     title = title.slice(0, 100);
   }
+  const description = (args.description || process.env.YOUTUBE_DESCRIPTION || DEFAULT_DESCRIPTION).trim();
 
   let description = (args.description || process.env.YOUTUBE_DESCRIPTION || '').trim();
   if (!description) {

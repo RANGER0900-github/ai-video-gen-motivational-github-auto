@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import random
 import time
 
 from .config import load_config
@@ -12,7 +13,7 @@ from .storage import AssetStore
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="CLI video generation runner")
     parser.add_argument("--count", type=int, default=1)
     parser.add_argument("--darken", type=float, default=None)
     parser.add_argument("--image-name", default=None)
@@ -26,19 +27,19 @@ def main() -> None:
     job_service = JobService(JobContext(config=config, db=database, assets=AssetStore(config), quotes=quote_store))
     job_service.start()
     try:
-        quotes = [quote.row_id for quote in quote_store.list_quotes() if quote.status.lower() != "used"][: args.count]
-        unused = [quote.row_id for quote in quote_store.list_quotes() if quote.status.lower() != "used"]
+        all_records = quote_store.list_quotes()
+        if not all_records:
+            raise ValueError("No quotes found in quotes.csv")
+
+        unused = [q.row_id for q in all_records if q.status.lower() != "used"]
         if len(unused) >= args.count:
             quotes = unused[: args.count]
         elif unused:
-            all_quotes = [quote.row_id for quote in quote_store.list_quotes()]
-            quotes = unused + [q for q in all_quotes if q not in unused][: args.count - len(unused)]
+            all_ids = [q.row_id for q in all_records]
+            quotes = unused + [q_id for q_id in all_ids if q_id not in unused][: args.count - len(unused)]
         else:
-            import random
-            all_quotes = [quote.row_id for quote in quote_store.list_quotes()]
-            if not all_quotes:
-                raise ValueError("No quotes found in quotes.csv")
-            quotes = random.sample(all_quotes, min(args.count, len(all_quotes)))
+            all_ids = [q.row_id for q in all_records]
+            quotes = random.sample(all_ids, min(args.count, len(all_ids)))
 
         jobs = job_service.create_jobs(CreateJobRequest(row_ids=quotes, darken=args.darken, image_name=args.image_name, music_name=args.music_name))
         pending = {job.id for job in jobs}

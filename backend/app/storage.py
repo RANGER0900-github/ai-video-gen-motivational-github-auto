@@ -44,6 +44,13 @@ class AssetStore:
         if not self.config.images_usage_json.exists():
             return {item.name: 0 for item in self.list_images()}
         return json.loads(self.config.images_usage_json.read_text(encoding="utf-8"))
+        try:
+            content = self.config.images_usage_json.read_text(encoding="utf-8").strip()
+            if not content:
+                return {item.name: 0 for item in self.list_images()}
+            return json.loads(content)
+        except Exception:
+            return {item.name: 0 for item in self.list_images()}
 
     def _write_usage(self, usage: dict[str, int]) -> None:
         temp_path = self.config.images_usage_json.with_suffix(".tmp")

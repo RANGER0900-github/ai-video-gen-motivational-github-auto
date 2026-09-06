@@ -50,6 +50,20 @@ jobs:
         run: |
           npm ci || npm install
 
+      - name: Pre-flight syntax and integrity checks
+        env:
+          PYTHONPATH: backend
+        run: |
+          echo "Checking Node.js scripts syntax..."
+          node -c upload.js
+          node -c scripts/get_youtube_token.js
+          echo "Checking Python scripts syntax..."
+          python -m py_compile $(find backend/app -name "*.py")
+          echo "Running pipeline tests..."
+          pip install pytest
+          pytest tests/
+          echo "Pre-flight checks passed!"
+
       - name: Generate motivational video
         env:
           PYTHONPATH: backend

@@ -73,6 +73,9 @@ function parseArgs(argv) {
 }
 
 function jobRowForFile(resolvedVideo) {
+  if (!fs.existsSync(DB_PATH)) {
+    return null;
+  }
   const db = new DatabaseSync(DB_PATH, { readonly: true });
   try {
     const relativeFromRoot = path.relative(ROOT, resolvedVideo).replaceAll(path.sep, '/');
@@ -90,6 +93,9 @@ function jobRowForFile(resolvedVideo) {
 }
 
 function newestCompletedVideoFromDb() {
+  if (!fs.existsSync(DB_PATH)) {
+    throw new Error(`Database file not found at ${DB_PATH}. Ensure video generation ran first.`);
+  }
   const db = new DatabaseSync(DB_PATH, { readonly: true });
   try {
     const row = db.prepare(`
@@ -115,6 +121,51 @@ function requireValue(name, value) {
   return String(value).trim();
 }
 
+function buildDynamicTitle(sourceJob, customTitle) {
+  if (customTitle && customTitle.trim()) {
+    return customTitle.trim().slice(0, 100);
+  }
+  if (sourceJob && sourceJob.quote) {
+    const cleanQuote = sourceJob.quote.replace(/^["'\s]+|["'\s]+$/g, '').trim();
+    const suffix = ' #Shorts #motivation';
+    const maxLen = 100 - suffix.length;
+    const clipped = cleanQuote.length > maxLen ? cleanQuote.slice(0, maxLen).trim() : cleanQuote;
+    return `${clipped}${suffix}`.slice(0, 100);
+  }
+  return DEFAULT_TITLE;
+}
+
+function buildDynamicDescription(sourceJob, customDescription) {
+  if (customDescription && customDescription.trim()) {
+    return customDescription.trim();
+  }
+  if (sourceJob && sourceJob.quote) {
+    const authorLine = sourceJob.author ? `\n— ${sourceJob.author.trim()}\n` : '\n';
+    return `"${sourceJob.quote.trim()}"${authorLine}\nSave this short, share it, and come back when you need a reset.\n\n` + DEFAULT_DESCRIPTION;
+  }
+  return DEFAULT_DESCRIPTION;
+}
+
+async function uploadWithRetry(youtube, requestParams, maxRetries = 3) {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      return await youtube.videos.insert(requestParams);
+    } catch (err) {
+      attempt += 1;
+      const status = err?.code || err?.response?.status;
+      const isTransient = status === 500 || status === 502 || status === 503 || status === 504;
+      if (isTransient && attempt < maxRetries) {
+        const delayMs = attempt * 3000;
+        console.warn(`⚠️ Transient error ${status}. Retrying upload in ${delayMs / 1000}s (attempt ${attempt}/${maxRetries})...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv);
   const jsonMode = Boolean(args.json);
@@ -133,34 +184,8 @@ async function main() {
   }
   const sourceJob = jobRowForFile(resolvedVideo) || latest;
 
-  const title = (args.title || process.env.YOUTUBE_TITLE || DEFAULT_TITLE).trim();
-  let title = (args.title || process.env.YOUTUBE_TITLE || '').trim();
-  if (!title) {
-    if (sourceJob && sourceJob.quote) {
-      const cleanQuote = sourceJob.quote.replace(/^["'\s]+|["'\s]+$/g, '');
-      const suffix = ' #Shorts #motivation';
-      const maxLen = 100 - suffix.length;
-      const clipped = cleanQuote.length > maxLen ? cleanQuote.slice(0, maxLen).trim() : cleanQuote;
-      title = `${clipped}${suffix}`;
-    } else {
-      title = DEFAULT_TITLE;
-    }
-  }
-  if (title.length > 100) {
-    throw new Error(`Title exceeds 100 characters (${title.length}): ${title}`);
-    title = title.slice(0, 100);
-  }
-  const description = (args.description || process.env.YOUTUBE_DESCRIPTION || DEFAULT_DESCRIPTION).trim();
-
-  let description = (args.description || process.env.YOUTUBE_DESCRIPTION || '').trim();
-  if (!description) {
-    if (sourceJob && sourceJob.quote) {
-      const authorLine = sourceJob.author ? `\n— ${sourceJob.author.trim()}\n` : '\n';
-      description = `"${sourceJob.quote.trim()}"${authorLine}\nSave this short, share it, and come back when you need a reset.\n\n` + DEFAULT_DESCRIPTION;
-    } else {
-      description = DEFAULT_DESCRIPTION;
-    }
-  }
+  const title = buildDynamicTitle(sourceJob, args.title || process.env.YOUTUBE_TITLE);
+  const description = buildDynamicDescription(sourceJob, args.description || process.env.YOUTUBE_DESCRIPTION);
   const privacy = (args.privacy || process.env.YOUTUBE_PRIVACY_STATUS || DEFAULT_PRIVACY).trim();
   const categoryId = (args.category || process.env.YOUTUBE_CATEGORY_ID || DEFAULT_CATEGORY_ID).trim();
   const tags = (args.tags || process.env.YOUTUBE_TAGS || DEFAULT_TAGS.join(','))
@@ -183,7 +208,7 @@ async function main() {
   oauth2Client.setCredentials({ refresh_token: refreshToken });
   const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
 
-  const res = await youtube.videos.insert({
+  const res = await uploadWithRetry(youtube, {
     part: ['snippet', 'status'],
     requestBody: {
       snippet: {
@@ -240,13 +265,13 @@ main().catch((err) => {
   } else {
     console.error(`❌ Upload failed: ${message}`);
     if (/quota/i.test(message) || /quota/i.test(reason)) {
-      console.error('   Daily YouTube Data API quota may be exhausted.');
+      console.error('   Daily YouTube Data API quota may be exhausted (10,000 units/day limit).');
     }
     if (/forbidden|403/i.test(message)) {
-      console.error('   Check that YouTube Data API v3 is enabled and the OAuth project/channel is allowed to upload.');
+      console.error('   Check that YouTube Data API v3 is enabled and the OAuth credentials are valid.');
     }
     if (/invalid_grant|refresh token|unauthorized/i.test(message)) {
-      console.error('   The refresh token may be invalid or revoked.');
+      console.error('   The refresh token may be invalid or revoked. Run scripts/get_youtube_token.js to re-authenticate.');
     }
   }
   process.exit(1);

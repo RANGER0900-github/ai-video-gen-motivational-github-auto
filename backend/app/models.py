@@ -26,6 +26,8 @@ class CreateJobRequest(BaseModel):
     custom_quote: str | None = None
     custom_author: str | None = None
     image_name: str | None = None
+    video_name: str | None = None
+    media_type: str | None = None
     music_name: str | None = None
     darken: float | None = None
 
@@ -39,6 +41,7 @@ class JobSummary(BaseModel):
     quote: str
     author: str | None = None
     image_name: str | None = None
+    media_type: str | None = None
     music_name: str | None = None
     output_path: str | None = None
     created_at: datetime

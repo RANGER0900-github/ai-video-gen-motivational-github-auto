@@ -5,10 +5,13 @@ An automated, serverless motivational video generator and YouTube Shorts publish
 ## How It Works
 
 1. **Scheduled Trigger**: GitHub Actions runs on a cron schedule 6 times a day (every 4 hours around the clock at 00:00, 04:00, 08:00, 12:00, 16:00, and 20:00 UTC) to match the free YouTube Data API quota limit. It can also be triggered on-demand via `workflow_dispatch` in the GitHub Actions UI.
-2. **Video Rendering**: Python selects an unused quote from `quotes.csv` and the least-used background image from `images_usage.json`. Pillow renders smooth, wrapped, faded text overlays, and FFmpeg pairs them with background music into a crisp 1080x1920 (9:16 portrait) video.
-3. **YouTube Shorts Upload**: Node.js (`upload.js`) uploads the generated video directly to YouTube with an auto-generated title derived from the quote, rich descriptions, and trending motivational hashtags.
-4. **State Persistence**: GitHub Actions automatically commits and pushes the updated `quotes.csv` (with the quote marked as `used`) and `images_usage.json` (with updated image counters) back to the repository with `[skip ci]`.
-5. **No Bloat**: Temporary video files in `outputs/` are discarded when the runner stops, keeping your git repository lean and fast.
+2. **5:1 Media Ratio Scheduler**: Out of the 6 daily scheduled runs, **5 runs produce dynamic video backgrounds** from `videos/` and **1 run produces an image background** from `images/`. Both media pools automatically rotate through least-used assets so footage never repeats until all are exhausted.
+3. **Brian Neural Voice & Whisper Subtitles**: Quotes are voiced using Edge-TTS Brian (`en-US-BrianMultilingualNeural`, `-6Hz` pitch, `-5%` rate). Subtitles are synced with word-level timestamps extracted via Faster-Whisper, alternating between Spotlight and Cumulative Gold Wave animated karaoke effects.
+4. **Watermark Branding & Logo Concealment**: Every video features an antialiased channel watermark overlay (`assets/watermark.png`) at `x=835, y=1675`, seamlessly covering the bottom-right Gemini star logo.
+5. **Acoustic Audio Mixing**: Automatically balances 3 audio tracks: 100% voiceover clarity, 10% (*-20 dB*) *"Me and the Devil"* soundtrack, and 15% video ambient sound effects, with a smooth 1-second outro audio fade.
+6. **YouTube Shorts Upload**: Node.js (`upload.js`) uploads the generated video directly to YouTube Shorts with dynamic title generation derived from the quote, rich descriptions, and trending motivational hashtags.
+7. **State Persistence**: GitHub Actions automatically commits and pushes updated `quotes.csv`, `media_usage.json`, and `images_usage.json` back to the repository with `[skip ci]`.
+8. **Zero Repo Bloat**: Temporary video outputs in `outputs/` are discarded after each run, keeping the git repository clean.
 
 ## Quota & Scheduling
 
@@ -43,21 +46,24 @@ Follow the URL prompt to authorize and paste back the authorization code.
 ```text
 .github/workflows/
   auto_upload.yml       # GitHub Actions scheduled workflow
+assets/
+  watermark.png         # Channel watermark badge overlay (covers Gemini star)
 backend/
   app/
-    cli.py              # CLI entry point for batch/single video generation
-    config.py           # App configuration and paths
+    cli.py              # CLI entry point (--media-type auto|video|image)
+    config.py           # App configuration, audio mixing, and paths
     csv_store.py        # quotes.csv reader, writer, and selection logic
     database.py         # SQLite job and event database
     jobs.py             # Render queue and worker service
     models.py           # Pydantic data models
-    renderer.py         # Pillow + FFmpeg video generation engine
-    storage.py          # Asset discovery and images_usage.json tracking
-images/                 # Background portrait images
-music/                  # Background audio tracks
+    renderer.py         # Brian TTS + Whisper + ASS + FFmpeg video generation engine
+    storage.py          # 5:1 media scheduler and asset rotation
+videos/                 # Cinematic portrait background videos
+images/                 # Portrait background images
+music/                  # Background audio tracks (Me and the Devil)
 fonts/                  # Font files (NotoSans, PlayfairDisplay)
 quotes.csv              # Quote library (auto-updated with usage timestamps)
-images_usage.json       # Usage counter for balanced image rotation
+media_usage.json        # 5:1 scheduler counter and media rotation state
 upload.js               # Node.js YouTube OAuth2 uploader
 scripts/
   get_youtube_token.js  # Helper to generate YouTube OAuth refresh token

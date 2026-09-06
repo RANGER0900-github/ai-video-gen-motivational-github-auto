@@ -82,6 +82,7 @@ JOB_EXTRA_COLUMNS: dict[str, str] = {
     "delivered_at": "TEXT",
     "telegram_file_id": "TEXT",
     "telegram_message_id": "INTEGER",
+    "media_type": "TEXT",
 }
 
 BOT_STATE_EXTRA_COLUMNS: dict[str, str] = {
@@ -127,15 +128,15 @@ class Database:
             if name not in existing:
                 conn.execute(f"ALTER TABLE bot_state ADD COLUMN {name} {ddl}")
 
-    def create_job(self, quote: str, author: str | None, source_row_id: int | None, image_name: str | None, music_name: str | None, darken: float, message: str = "Job accepted", origin: str = "manual", chat_id: int | None = None, batch_id: int | None = None, delivery_status: str = "pending") -> int:
+    def create_job(self, quote: str, author: str | None, source_row_id: int | None, image_name: str | None, music_name: str | None, darken: float, message: str = "Job accepted", origin: str = "manual", chat_id: int | None = None, batch_id: int | None = None, delivery_status: str = "pending", media_type: str | None = None) -> int:
         now = datetime.now(timezone.utc).isoformat()
         with self.connect() as conn:
             cursor = conn.execute(
                 """
-                INSERT INTO jobs (status, progress, phase, message, quote, author, source_row_id, image_name, music_name, darken, created_at, updated_at, origin, chat_id, batch_id, delivery_status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO jobs (status, progress, phase, message, quote, author, source_row_id, image_name, music_name, darken, created_at, updated_at, origin, chat_id, batch_id, delivery_status, media_type)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                ("queued", 0.0, "Queued", message, quote, author, source_row_id, image_name, music_name, darken, now, now, origin, chat_id, batch_id, delivery_status),
+                ("queued", 0.0, "Queued", message, quote, author, source_row_id, image_name, music_name, darken, now, now, origin, chat_id, batch_id, delivery_status, media_type),
             )
             job_id = int(cursor.lastrowid)
             conn.execute(
@@ -368,6 +369,7 @@ def row_to_job(row) -> JobDetail:
         quote=row["quote"],
         author=row["author"],
         image_name=row["image_name"],
+        media_type=row["media_type"] if "media_type" in row.keys() else None,
         music_name=row["music_name"],
         output_path=row["output_path"],
         created_at=datetime.fromisoformat(row["created_at"]),

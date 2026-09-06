@@ -16,6 +16,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="CLI video generation runner")
     parser.add_argument("--count", type=int, default=1)
     parser.add_argument("--darken", type=float, default=None)
+    parser.add_argument("--media-type", choices=["auto", "video", "image"], default="auto", help="Background media type (auto adheres to 5:1 daily ratio)")
+    parser.add_argument("--video-name", default=None, help="Specific video background filename")
     parser.add_argument("--image-name", default=None)
     parser.add_argument("--music-name", default=None)
     parser.add_argument("--workers", type=int, default=1, help="Reserved for compatibility; rendering currently uses one background worker")
@@ -41,7 +43,16 @@ def main() -> None:
             all_ids = [q.row_id for q in all_records]
             quotes = random.sample(all_ids, min(args.count, len(all_ids)))
 
-        jobs = job_service.create_jobs(CreateJobRequest(row_ids=quotes, darken=args.darken, image_name=args.image_name, music_name=args.music_name))
+        jobs = job_service.create_jobs(
+            CreateJobRequest(
+                row_ids=quotes,
+                darken=args.darken,
+                image_name=args.image_name,
+                video_name=args.video_name,
+                media_type=args.media_type,
+                music_name=args.music_name,
+            )
+        )
         pending = {job.id for job in jobs}
         failed = set()
         while pending:

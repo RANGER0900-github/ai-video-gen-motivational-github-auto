@@ -56,6 +56,13 @@ class JobService:
         jobs: list[JobSummary] = []
         waiting_for_slot = self.context.db.count_active_jobs() > 0
         queued_message = "Waiting for current render to finish" if waiting_for_slot else "Job accepted"
+        media_name = payload.video_name or payload.image_name
+        media_type = payload.media_type
+        if payload.video_name:
+            media_type = "video"
+        elif payload.image_name:
+            media_type = "image"
+
         if not row_ids and not custom_quote:
             record = self.context.quotes.choose_random_quote()
             row_ids = [record.row_id]
@@ -64,13 +71,14 @@ class JobService:
                 quote=custom_quote,
                 author=custom_author,
                 source_row_id=None,
-                image_name=payload.image_name,
+                image_name=media_name,
                 music_name=payload.music_name,
                 darken=darken,
                 message=queued_message,
                 origin=origin,
                 chat_id=chat_id,
                 batch_id=batch_id,
+                media_type=media_type,
             )
             self._queue.put(job_id)
             jobs.append(self.get_job(job_id, summary=True))
@@ -81,13 +89,14 @@ class JobService:
                 quote=record.quote,
                 author=record.author or None,
                 source_row_id=row_id,
-                image_name=payload.image_name,
+                image_name=media_name,
                 music_name=payload.music_name,
                 darken=darken,
                 message=queued_message,
                 origin=origin,
                 chat_id=chat_id,
                 batch_id=batch_id,
+                media_type=media_type,
             )
             self._queue.put(job_id)
             jobs.append(self.get_job(job_id, summary=True))
@@ -160,11 +169,14 @@ class JobService:
                 return
 
             self._progress(job_id, "preparing", 0.08, "Preparing", "Loading project assets", started=True)
-            image_path = self.context.assets.choose_image(job.image_name)
+            media_path, media_type = self.context.assets.choose_background_media(
+                media_type=getattr(job, "media_type", None),
+                requested_name=job.image_name
+            )
             music_path = self.context.assets.choose_music(job.music_name)
             quote_font_file = self.context.assets.default_quote_font()
             author_font_file = self.context.assets.default_author_font()
-            self._progress(job_id, "preparing", 0.2, "Preparing", f"Using {image_path.name} with {music_path.name}")
+            self._progress(job_id, "preparing", 0.2, "Preparing", f"Using {media_path.name} ({media_type}) with {music_path.name}")
 
             outname = f"job_{job_id}_{int(time.time())}.mp4"
 
@@ -175,7 +187,7 @@ class JobService:
 
             outpath = render_video(
                 config=self.context.config,
-                image_path=image_path,
+                media_path=media_path,
                 music_path=music_path,
                 quote=job.quote,
                 author=job.author,
@@ -185,6 +197,8 @@ class JobService:
                 author_font_file=author_font_file,
                 progress_callback=emit,
                 cancel_event=cancel_event,
+                media_type=media_type,
+                watermark_path=self.context.config.watermark_path,
             )
             relative_output = outpath.relative_to(self.context.config.root_dir).as_posix()
             if job.source_row_id is not None:

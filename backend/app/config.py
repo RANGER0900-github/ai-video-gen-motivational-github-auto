@@ -12,11 +12,14 @@ class AppConfig:
     state_dir: Path
     db_path: Path
     images_dir: Path
+    videos_dir: Path
     music_dir: Path
     fonts_dir: Path
     outputs_dir: Path
+    watermark_path: Path
     quotes_csv: Path
     images_usage_json: Path
+    media_usage_json: Path
     youtube_queue_json: Path
     instagram_queue_json: Path
     upload_js_path: Path
@@ -27,6 +30,13 @@ class AppConfig:
     instagram_profile_name: str
     instagram_target_username: str
     instagram_upload_timeout_seconds: int
+    voice_model: str = "en-US-BrianMultilingualNeural"
+    voice_pitch: str = "-6Hz"
+    voice_rate: str = "-5%"
+    voice_volume: float = 1.0
+    music_volume: float = 0.10
+    video_sfx_volume: float = 0.15
+    whisper_model_size: str = "base.en"
     max_duration: float = 20.0
     fps: int = 24
     width: int = 1080
@@ -72,11 +82,14 @@ def load_config(root_dir: Path | None = None) -> AppConfig:
         state_dir=state_dir,
         db_path=state_dir / "app.db",
         images_dir=root / "images",
+        videos_dir=root / "videos",
         music_dir=root / "music",
         fonts_dir=root / "fonts",
         outputs_dir=root / "outputs",
+        watermark_path=root / "assets" / "watermark.png",
         quotes_csv=root / "quotes.csv",
         images_usage_json=root / "images_usage.json",
+        media_usage_json=root / "media_usage.json",
         youtube_queue_json=state_dir / "youtube_queue.json",
         instagram_queue_json=state_dir / "instagram_queue.json",
         upload_js_path=root / "upload.js",
@@ -103,7 +116,7 @@ def load_config(root_dir: Path | None = None) -> AppConfig:
 
 def check_runtime(config: AppConfig) -> list[str]:
     issues: list[str] = []
-    for directory in (config.images_dir, config.music_dir, config.fonts_dir, config.outputs_dir, config.state_dir):
+    for directory in (config.images_dir, config.videos_dir, config.music_dir, config.fonts_dir, config.outputs_dir, config.state_dir):
         if not directory.exists():
             issues.append(f"Missing directory: {directory}")
     if not config.quotes_csv.exists():

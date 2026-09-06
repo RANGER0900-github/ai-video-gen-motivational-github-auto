@@ -15,8 +15,8 @@ RUNTIME_COLUMNS = ("status", "used_time", "output", "error")
 
 
 class QuoteStore:
-    def __init__(self, csv_path: Path):
-        self.csv_path = csv_path
+    def __init__(self, csv_path: Path | str):
+        self.csv_path = Path(csv_path)
         self._lock = Lock()
 
     def _load_df(self) -> pd.DataFrame:

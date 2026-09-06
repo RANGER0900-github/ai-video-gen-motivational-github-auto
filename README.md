@@ -4,8 +4,8 @@ An automated, serverless motivational video generator and YouTube Shorts publish
 
 ## How It Works
 
-1. **Scheduled Trigger**: GitHub Actions runs on a cron schedule 6 times a day (every 4 hours around the clock at 00:00, 04:00, 08:00, 12:00, 16:00, and 20:00 UTC) to match the free YouTube Data API quota limit. It can also be triggered on-demand via `workflow_dispatch` in the GitHub Actions UI.
-2. **5:1 Media Ratio Scheduler**: Out of the 6 daily scheduled runs, **5 runs produce dynamic video backgrounds** from `videos/` and **1 run produces an image background** from `images/`. Both media pools automatically rotate through least-used assets so footage never repeats until all are exhausted.
+1. **Scheduled Trigger**: GitHub Actions runs on an hourly cron schedule 24 times a day around the clock (`0 * * * *`). It can also be triggered on-demand via `workflow_dispatch` in the GitHub Actions UI.
+2. **Guaranteed 7:3 Media Ratio Scheduler**: For every 10 runs, exactly **7 runs produce dynamic video backgrounds** from `videos/` and **3 runs produce image backgrounds** from `images/` (yielding ~17 videos and ~7 images per day). An organic 10-run shuffled deck ensures the sequence is randomized, and assets rotate through least-used items so footage and images cycle fairly without repetition.
 3. **Brian Neural Voice & Whisper Subtitles**: Quotes are voiced using Edge-TTS Brian (`en-US-BrianMultilingualNeural`, `-6Hz` pitch, `-5%` rate). Subtitles are synced with word-level timestamps extracted via Faster-Whisper, alternating between Spotlight and Cumulative Gold Wave animated karaoke effects.
 4. **Watermark Branding & Logo Concealment**: Every video features an antialiased channel watermark overlay (`assets/watermark.png`) at `x=835, y=1675`, seamlessly covering the bottom-right Gemini star logo.
 5. **Acoustic Audio Mixing**: Automatically balances 3 audio tracks: 100% voiceover clarity, 10% (*-20 dB*) *"Me and the Devil"* soundtrack, and 15% video ambient sound effects, with a smooth 1-second outro audio fade.
@@ -15,13 +15,11 @@ An automated, serverless motivational video generator and YouTube Shorts publish
 
 ## Quota & Scheduling
 
-The free tier of the YouTube Data API provides **10,000 units per day**. Each video upload costs **1,600 units**, allowing a maximum of **6 video uploads per day** ($10,000 / 1,600 = 6$).
-
-The workflow schedule in `.github/workflows/auto_upload.yml`:
+The workflow schedule in `.github/workflows/auto_upload.yml` runs every hour (24 times a day):
 ```yaml
 schedule:
-  # Runs 6 times a day: every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
-  - cron: '0 0,4,8,12,16,20 * * *'
+  # Runs hourly: 24 times a day around the clock
+  - cron: '0 * * * *'
 ```
 
 ## GitHub Secrets

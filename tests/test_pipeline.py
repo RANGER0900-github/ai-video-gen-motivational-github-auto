@@ -67,8 +67,8 @@ def test_config_defaults():
     assert config.watermark_path.name == "watermark.png"
 
 
-def test_5_to_1_ratio_scheduler(tmp_path):
-    """Verify that AssetStore follows the 5:1 video-to-image daily ratio cycle."""
+def test_guaranteed_7_to_3_ratio_scheduler(tmp_path):
+    """Verify that AssetStore guarantees an exact 7:3 (70% video / 30% image) ratio over 10-run blocks."""
     config = load_config(ROOT)
     temp_usage_file = tmp_path / "test_media_usage.json"
     temp_legacy_file = tmp_path / "test_images_usage.json"
@@ -80,20 +80,22 @@ def test_5_to_1_ratio_scheduler(tmp_path):
         config.images_usage_json = temp_legacy_file
         store = AssetStore(config)
         
-        # Across 7 consecutive runs:
-        # Runs 0..4: video
-        # Run 5: image
-        # Run 6: video
-        types = []
-        for _ in range(7):
-            _, m_type = store.choose_background_media()
-            types.append(m_type)
+        # Batch 1: Exactly 7 videos and 3 images
+        batch1 = [store.choose_background_media()[1] for _ in range(10)]
+        assert batch1.count("video") == 7, f"Batch 1 should have 7 videos, got {batch1.count('video')}"
+        assert batch1.count("image") == 3, f"Batch 1 should have 3 images, got {batch1.count('image')}"
+
+        # Batch 2: Exactly 7 videos and 3 images
+        batch2 = [store.choose_background_media()[1] for _ in range(10)]
+        assert batch2.count("video") == 7, f"Batch 2 should have 7 videos, got {batch2.count('video')}"
+        assert batch2.count("image") == 3, f"Batch 2 should have 3 images, got {batch2.count('image')}"
+
+        # Batch 3: Exactly 7 videos and 3 images
+        batch3 = [store.choose_background_media()[1] for _ in range(10)]
+        assert batch3.count("video") == 7
+        assert batch3.count("image") == 3
         
-        assert types == ["video", "video", "video", "video", "video", "image", "video"], (
-            f"Expected 5 videos, 1 image, then wrap to video, but got: {types}"
-        )
-        
-        # Test explicit override
+        # Test explicit overrides
         _, force_img = store.choose_background_media(media_type="image")
         assert force_img == "image"
         _, force_vid = store.choose_background_media(media_type="video")

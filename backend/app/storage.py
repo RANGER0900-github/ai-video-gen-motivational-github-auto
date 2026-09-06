@@ -46,6 +46,7 @@ class AssetStore:
     def _read_media_usage(self) -> dict:
         usage = {
             "schedule_counter": 0,
+            "schedule_deck": [],
             "videos": {},
             "images": {}
         }
@@ -95,9 +96,9 @@ class AssetStore:
         requested_name: str | None = None
     ) -> tuple[Path, str]:
         """
-        Chooses background media according to the 5:1 daily ratio schedule.
+        Chooses background media according to the guaranteed 7:3 ratio (70% video / 30% image)
+        using a randomized 10-run shuffled deck.
         Returns: (media_path, "video" | "image")
-        Schedule: Out of 6 daily runs, 5 are videos (cycle 0..4) and 1 is an image (cycle 5).
         """
         videos = {item.name: self.config.root_dir / item.path for item in self.list_background_videos()}
         images = {item.name: self.config.root_dir / item.path for item in self.list_images()}
@@ -108,10 +109,13 @@ class AssetStore:
 
             target_type = media_type
             if not target_type or target_type == "auto":
-                if (schedule_counter % 6) == 5:
-                    target_type = "image"
-                else:
-                    target_type = "video"
+                deck = usage.get("schedule_deck")
+                if not deck or not isinstance(deck, list):
+                    # Refill deck with exactly 7 videos and 3 images, shuffled randomly
+                    deck = ["video"] * 7 + ["image"] * 3
+                    random.shuffle(deck)
+                target_type = deck.pop(0)
+                usage["schedule_deck"] = deck
                 usage["schedule_counter"] = schedule_counter + 1
 
             if target_type == "video":
@@ -128,7 +132,11 @@ class AssetStore:
                     return chosen, "video"
 
             if not images:
-                raise FileNotFoundError("No images available")
+                if videos:
+                    chosen = self._pick_least_used(videos, usage.setdefault("videos", {}))
+                    self._write_media_usage(usage)
+                    return chosen, "video"
+                raise FileNotFoundError("No images or videos available")
             if requested_name:
                 if requested_name in images:
                     self._write_media_usage(usage)

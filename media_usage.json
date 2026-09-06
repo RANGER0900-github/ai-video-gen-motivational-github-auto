@@ -34,5 +34,15 @@
     "ecaec9d2-5cd5-4fbd-b9a1-b92ff387afdf.png": 0,
     "f1940f32-6fd6-44b5-adea-d959c3a7a4a8.png": 0,
     "fad18bdb-6ea7-42ec-8143-887ea299494a.png": 0
-  }
+  },
+  "schedule_deck": [
+    "image",
+    "video",
+    "video",
+    "video",
+    "image",
+    "image",
+    "video",
+    "video"
+  ]
 }

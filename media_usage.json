@@ -1,6 +1,16 @@
 {
-  "schedule_counter": 60,
-  "schedule_deck": [],
+  "schedule_counter": 61,
+  "schedule_deck": [
+    "image",
+    "image",
+    "image",
+    "video",
+    "video",
+    "video",
+    "video",
+    "video",
+    "video"
+  ],
   "videos": {
     "Archer_and_knight_journey_sequences_202609061224.mp4": 2,
     "Assassin_and_warrior_charging_se\u2026_202609061223.mp4": 2,
@@ -17,7 +27,7 @@
     "Books_floating_in_magical_library_202609061601.mp4": 2,
     "Celestial_whales_swim_in_sky_202609061601.mp4": 2,
     "Clockwork_tower_above_clouds_202609061601.mp4": 2,
-    "Frozen_waterfall_in_hidden_canyon_202609061601.mp4": 1,
+    "Frozen_waterfall_in_hidden_canyon_202609061601.mp4": 2,
     "Futuristic_crystalline_greenhous\u2026_202609061601.mp4": 1,
     "Glowing_leaves_floating_in_grove_202609061601.mp4": 2,
     "Mirrors_reflecting_glowing_flowers_202609061601.mp4": 1,

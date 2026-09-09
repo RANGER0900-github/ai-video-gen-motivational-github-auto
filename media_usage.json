@@ -1,6 +1,16 @@
 {
-  "schedule_counter": 70,
-  "schedule_deck": [],
+  "schedule_counter": 71,
+  "schedule_deck": [
+    "video",
+    "image",
+    "video",
+    "image",
+    "video",
+    "video",
+    "video",
+    "video",
+    "video"
+  ],
   "videos": {
     "Archer_and_knight_journey_sequences_202609061224.mp4": 2,
     "Assassin_and_warrior_charging_se\u2026_202609061223.mp4": 2,
@@ -36,7 +46,7 @@
     "69cb87d1-ad61-4dfb-ad97-1be2284ffac0__01.png": 1,
     "7afe31ab-56a8-4bd3-bded-9e8ed88097c1.png": 1,
     "991c8cd5-3c30-4a5a-b39d-2cc4a9fc6ba1.png": 1,
-    "a7c8aeb5-37ae-4c34-a21b-f459e848f245.png": 1,
+    "a7c8aeb5-37ae-4c34-a21b-f459e848f245.png": 2,
     "b29c3e35-b670-4c76-b847-2db147b6ab5a.png": 1,
     "bd5a3d77-b54b-4a2a-90fd-1af7be08645f.png": 1,
     "be6f45a3-0a6b-45a6-adea-90aeb5594d67.png": 1,

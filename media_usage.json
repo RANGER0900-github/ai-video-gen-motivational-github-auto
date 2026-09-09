@@ -1,6 +1,16 @@
 {
-  "schedule_counter": 80,
-  "schedule_deck": [],
+  "schedule_counter": 81,
+  "schedule_deck": [
+    "image",
+    "video",
+    "video",
+    "image",
+    "video",
+    "video",
+    "video",
+    "video",
+    "image"
+  ],
   "videos": {
     "Archer_and_knight_journey_sequences_202609061224.mp4": 2,
     "Assassin_and_warrior_charging_se\u2026_202609061223.mp4": 3,
@@ -11,7 +21,7 @@
     "Figure_transitioning_into_blacks\u2026_202609061223.mp4": 2,
     "Knight_standing_on_precipice_202609061223.mp4": 3,
     "Masked_figure_blacksmith_working\u2026_202609061223.mp4": 2,
-    "Warrior_charges_and_assassin_cro\u2026_202609061224.mp4": 2,
+    "Warrior_charges_and_assassin_cro\u2026_202609061224.mp4": 3,
     "Warrior_charges_and_assassin_leaps_202609061223.mp4": 2,
     "Warrior_charges_and_blacksmith_i\u2026_202609061224.mp4": 3,
     "Books_floating_in_magical_library_202609061601.mp4": 3,

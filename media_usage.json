@@ -1,7 +1,6 @@
 {
-  "schedule_counter": 121,
+  "schedule_counter": 122,
   "schedule_deck": [
-    "video",
     "video",
     "video",
     "image",
@@ -12,7 +11,7 @@
     "video"
   ],
   "videos": {
-    "Archer_and_knight_journey_sequences_202609061224.mp4": 3,
+    "Archer_and_knight_journey_sequences_202609061224.mp4": 4,
     "Assassin_and_warrior_charging_se\u2026_202609061223.mp4": 3,
     "Blacksmith_shapes_glowing_sword_202609061223.mp4": 4,
     "Fantasy_montage_with_characters_202609061223.mp4": 3,

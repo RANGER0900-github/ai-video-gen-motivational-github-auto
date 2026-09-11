@@ -1,7 +1,6 @@
 {
-  "schedule_counter": 151,
+  "schedule_counter": 152,
   "schedule_deck": [
-    "image",
     "image",
     "video",
     "video",
@@ -55,6 +54,6 @@
     "ec9279a2-310f-4e97-8798-dfeac2ed6bc4.png": 2,
     "ecaec9d2-5cd5-4fbd-b9a1-b92ff387afdf.png": 2,
     "f1940f32-6fd6-44b5-adea-d959c3a7a4a8.png": 3,
-    "fad18bdb-6ea7-42ec-8143-887ea299494a.png": 2
+    "fad18bdb-6ea7-42ec-8143-887ea299494a.png": 3
   }
 }

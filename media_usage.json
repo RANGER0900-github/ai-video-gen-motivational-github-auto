@@ -1,8 +1,6 @@
 {
-  "schedule_counter": 129,
-  "schedule_deck": [
-    "video"
-  ],
+  "schedule_counter": 130,
+  "schedule_deck": [],
   "videos": {
     "Archer_and_knight_journey_sequences_202609061224.mp4": 4,
     "Assassin_and_warrior_charging_se\u2026_202609061223.mp4": 4,
@@ -21,7 +19,7 @@
     "Clockwork_tower_above_clouds_202609061601.mp4": 4,
     "Frozen_waterfall_in_hidden_canyon_202609061601.mp4": 4,
     "Futuristic_crystalline_greenhous\u2026_202609061601.mp4": 4,
-    "Glowing_leaves_floating_in_grove_202609061601.mp4": 3,
+    "Glowing_leaves_floating_in_grove_202609061601.mp4": 4,
     "Mirrors_reflecting_glowing_flowers_202609061601.mp4": 4,
     "Starlight_bridge_across_cosmic_n\u2026_202609061601.mp4": 4,
     "Traveler_reaches_mountain_summit_202609061601.mp4": 4,
